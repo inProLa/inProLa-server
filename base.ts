@@ -2,7 +2,7 @@ import { Base } from "javascript-plugin-architecture-with-typescript-definitions
 import {getTitle} from "./plugins/pluginGetTitle";
 import {MongoClient} from "mongodb";
 import {getSummary} from "./plugins/pluginGetSummary";
-import {getConclusion} from "./plugins/pluginGetConclusion";
+import {getConclusion} from "./plugins/pluginGetAbstract";
 
 declare module "javascript-plugin-architecture-with-typescript-definitions" {
     namespace Base {

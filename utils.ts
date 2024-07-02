@@ -3,49 +3,36 @@ import * as path from 'path';
 import { google } from "googleapis";
 import { authenticate } from "@google-cloud/local-auth";
 import * as unzipper from 'unzipper';
-import * as AdmZip from 'adm-zip';
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly'];
-const TOKEN_PATH = path.join(process.cwd(), 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
-
-export const getTexFileContent = async (fileName: string) => {
-    let fileContent: string;
-    const zipPath = `./zippedLatexProjects/${fileName}.zip`;
-    const tempPath = `./temp/${fileName}`;
-
-    if (!fs.existsSync('./temp')) fs.mkdirSync('./temp');
-    if (!fs.existsSync(tempPath)) fs.mkdirSync(tempPath);
-
-    return await new Promise(
-        (resolve, reject) => {
-            fs.createReadStream(zipPath)
-                .pipe(unzipper.Extract({ path: tempPath }))
-                .on('finish', async () => {
-                    await fs.copyFileSync(`${tempPath}/main.tex`, `${tempPath}/main.txt`);
-                    fileContent = await fs.readFileSync(`${tempPath}/main.tex`, 'utf8');
-                    //TODO remove temp folder
-                    // await fs.rmSync(tempPath, {recursive: true});
-                    resolve(fileContent);
-                })
-                .on('error', reject);
-        }
-    )
-}
+const TOKEN_PATH = path.join(process.cwd(), './certs/token.json');
+const CREDENTIALS_PATH = path.join(process.cwd(), './certs/credentials.json');
 
 export const processTexFilesInLatexFolders = async () => {
-    const files = []
-    const latexDir = './zippedLatexProjects';
-    const texFiles = fs.readdirSync(latexDir, { withFileTypes: true })
-        .map(dirent => dirent.name);
+    const baseDirectory = './latexProjects';
+    const texContents: Array<{ texName: string, texContent: string }> = []
 
-    for (const tex of texFiles) {
-        const fileName = tex.split('.')[0];
-        const texContent = await getTexFileContent(fileName);
-        files.push({texContent, texName: fileName});
+    if (fs.existsSync(baseDirectory) && fs.lstatSync(baseDirectory).isDirectory()) {
+        const subfolders = fs.readdirSync(baseDirectory).filter((item) => {
+            const itemPath = path.join(baseDirectory, item);
+            return fs.lstatSync(itemPath).isDirectory();
+        });
+
+        subfolders.map(async (subfolder) => {
+            const mainTexPath = path.join(baseDirectory, subfolder);
+
+            if (fs.existsSync(mainTexPath) && fs.lstatSync(path.join(mainTexPath, 'main.tex')).isFile()) {
+                fs.copyFileSync(path.join(mainTexPath, 'main.tex'), path.join(mainTexPath, 'main.txt'));
+                texContents.push({
+                    texName: subfolder,
+                    texContent: fs.readFileSync(path.join(mainTexPath, 'main.txt'), 'utf8')
+                });
+                fs.rmSync(path.join(mainTexPath, 'main.txt'), {recursive: true});
+            }
+        });
     }
 
-    return files;
+    return texContents;
 }
 
 export const loadSavedCredentialsIfExist = async () => {
@@ -54,7 +41,7 @@ export const loadSavedCredentialsIfExist = async () => {
         const credentials = JSON.parse(content);
         return google.auth.fromJSON(credentials);
     } catch (err) {
-        console.error(err)
+        console.error('Need get the token')
         return null;
     }
 }
@@ -74,6 +61,7 @@ export const saveCredentials = async (client) => {
 
 export const authorize = async () => {
     let client: any = await loadSavedCredentialsIfExist();
+
     if (client) {
         return client;
     }
@@ -81,6 +69,7 @@ export const authorize = async () => {
         scopes: SCOPES,
         keyfilePath: CREDENTIALS_PATH,
     });
+
     if (client.credentials) {
         await saveCredentials(client);
     }
@@ -94,31 +83,69 @@ export const listFiles = async (authClient) => {
         fields: 'nextPageToken, files(id, name)',
         q: `'${process.env.GOOGLE_FOLDER_ID}' in parents and trashed = false`
     });
-    const files = res.data.files;
+    const files =  res.data.files;
     if (files.length === 0) {
         console.log('No files found.');
         return;
+    } else {
+        console.log(files);
     }
 
-    files.map((file) => {
-        downloadFile(authClient, file.id);
+    // Crie a pasta de destino se ela não existir
+    if (!fs.existsSync('./latexProjects')) {
+        fs.mkdirSync('./latexProjects');
+    }
+
+    return await Promise.all(
+        files.map(async (file) => {
+            return await downloadFile(authClient, file.id);
+        })
+    );
+}
+
+async function downloadFile(authClient, fileId) {
+    const drive = google.drive({version: 'v3', auth: authClient});
+    const folderPath = path.join('./latexProjects', fileId);
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Create the destination folder if it doesn't exist
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath);
+            }
+
+            // Download the file from Google Drive
+            drive.files.get({ fileId, alt: 'media' }, { responseType: 'arraybuffer' }).then(response => {
+                extrairArquivoZip(Buffer.from(response.data as ArrayBuffer), folderPath).then(resolve);
+            })
+
+        } catch (error) {
+            console.error('An error occurred while downloading or extracting the file:', error);
+            reject(error);
+        }
     });
 }
 
-export const downloadFile = (authClient, fileId) => {
-    const drive = google.drive({version: 'v3', auth: authClient});
-    if (!fs.existsSync('./zippedLatexProjects')) {
-        fs.mkdirSync('./zippedLatexProjects');
-    }
+export const getPemCert = (): Promise<string | null> => {
+    return new Promise((resolve, reject) => {
+      fs.readdir('./certs', (err, files) => {
+        if (err) {
+          reject(err);
+        } else {
+          const pemFile = files.find(file => path.extname(file) === '.pem');
+          resolve(pemFile || null);
+        }
+      });
+    });
+  }
 
-    drive.files.get({fileId: fileId, alt: 'media'}, {responseType: 'stream'},
-        function(err, res){
-            const fileStream = fs.createWriteStream(`./zippedLatexProjects/${fileId}.zip`)
-            res.data
-                .on('error', err => {
-                    console.log('Error', err);
-                })
-                .pipe(fileStream)
-        });
+async function extrairArquivoZip(buffer: Buffer, folderPath: string): Promise<any> {
+
+    // Crie um stream de leitura a partir do buffer
+    const stream = await unzipper.Open.buffer(buffer);
+
+    // Extraia cada arquivo do zip
+    return await stream.extract({
+        path: folderPath,
+    });
 }
-

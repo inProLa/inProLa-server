@@ -1,25 +1,17 @@
 import { MyBase } from "./base";
-import { processTexFilesInLatexFolders, authorize, listFiles, downloadFile} from "./utils";
+import { processTexFilesInLatexFolders, authorize, listFiles, getPemCert} from "./utils";
 import express, { Express, Request, Response } from "express";
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import * as dotenv from 'dotenv';
 
 const app: Express = express();
-const port = 3030;
+const port = 3000;
 const uri = `mongodb+srv://ifbainprola:CgpdhnGzuTP2xJa4@inprola.qv1pauu.mongodb.net/?retryWrites=true&w=majority&appName=InProLa`;
+let client = new MongoClient(uri);
 
 dotenv.config();
 
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-  tlsCertificateKeyFile: "./certs/X509-cert-5223493686402689113.pem",
-});
-
-app.get("/process", async (req: Request, res: Response) => {
+  app.get("/process", async (req: Request, res: Response) => {
 
   processTexFilesInLatexFolders().then((listTexContents) => {
     listTexContents.map( async (tex) => {
@@ -49,9 +41,10 @@ app.get("/download", async (req: Request, res: Response) => {
 });
 
 app.get("/downloadAndProcess", async (req: Request, res: Response) => {
-  authorize().then(auth => {
-    listFiles(auth).then(files => {
-      processTexFilesInLatexFolders().then((listTexContents) => {
+  authorize()
+      .then(listFiles)
+      .then(processTexFilesInLatexFolders)
+      .then(listTexContents => {
         listTexContents.map( async (tex) => {
           const myBase = new MyBase({
             texContent: tex.texContent,
@@ -61,12 +54,10 @@ app.get("/downloadAndProcess", async (req: Request, res: Response) => {
           await myBase.getSummary();
           await myBase.getTitle();
           await myBase.getConclusion();
+
+          res.send('Finished');
         });
-      }).catch((e) => {res.send(e)}).finally(() => {
-        res.send('Finished')
-      });
-    })
-  }).catch(e => res.send(e));
+      }).catch(e => res.send(e));
 });
 
 app.listen(port, () => {
@@ -76,6 +67,14 @@ app.listen(port, () => {
 
 async function startDb() {
   try {
+    client = new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+      tlsCertificateKeyFile: `./certs/${await getPemCert()}`,
+    });
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     await client.db("admin").command({ ping: 1 }).catch(console.error);
