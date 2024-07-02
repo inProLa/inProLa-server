@@ -30,10 +30,13 @@ dotenv.config();
 });
 
 app.get("/", async (req: Request, res: Response) => {
-  const db = await client.db("admin").command({ ping: 1 });
-  const gg = await authorize();
-
-  res.send(`Running!`);
+  try {
+    const db = await client.db("admin").command({ ping: 1 });
+    const gg = await authorize()
+    res.send(`Running! \n ${db} \n ${gg}`);
+  } catch (e) {
+    res.send(e)
+  }
 });
 
 app.get("/download", async (req: Request, res: Response) => {
@@ -53,7 +56,7 @@ app.get("/downloadAndProcess", async (req: Request, res: Response) => {
           });
           await myBase.getSummary();
           await myBase.getTitle();
-          await myBase.getConclusion();
+          await myBase.getAbstract();
 
           res.send('Finished');
         });
