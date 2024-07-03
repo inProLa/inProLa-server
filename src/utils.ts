@@ -3,6 +3,7 @@ import * as path from 'path';
 import { google } from "googleapis";
 import { authenticate } from "@google-cloud/local-auth";
 import * as unzipper from 'unzipper';
+import {OAuth2Client} from "google-auth-library";
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly'];
 const TOKEN_PATH = path.join(process.cwd(), './certs/token.json');
@@ -46,7 +47,7 @@ export const loadSavedCredentialsIfExist = async () => {
     }
 }
 
-export const saveCredentials = async (client) => {
+export const saveCredentials = async (client: OAuth2Client) => {
     const content: any = await fs.readFileSync(CREDENTIALS_PATH);
     const keys = JSON.parse(content);
     const key = keys.installed || keys.web;
@@ -76,7 +77,7 @@ export const authorize = async () => {
     return client;
 }
 
-export const listFiles = async (authClient) => {
+export const listFiles = async (authClient: OAuth2Client) => {
     const drive = google.drive({version: 'v3', auth: authClient});
     const res = await drive.files.list({
         pageSize: 10,
@@ -84,11 +85,9 @@ export const listFiles = async (authClient) => {
         q: `'${process.env.GOOGLE_FOLDER_ID}' in parents and trashed = false`
     });
     const files =  res.data.files;
-    if (files.length === 0) {
+    if (!files || files.length === 0) {
         console.log('No files found.');
         return;
-    } else {
-        console.log(files);
     }
 
     // Crie a pasta de destino se ela não existir
@@ -98,12 +97,12 @@ export const listFiles = async (authClient) => {
 
     return await Promise.all(
         files.map(async (file) => {
-            return await downloadFile(authClient, file.id);
+            return await downloadFile(authClient, file.id as string);
         })
     );
 }
 
-async function downloadFile(authClient, fileId) {
+async function downloadFile(authClient: OAuth2Client, fileId: string) {
     const drive = google.drive({version: 'v3', auth: authClient});
     const folderPath = path.join('./latexProjects', fileId);
 

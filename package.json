@@ -2,12 +2,12 @@
   "name": "pluggin",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx tsx index.ts",
-    "start:dev": "tsc-watch --onSuccess \"node ./dist/index.js\""
+    "start": "npx tsx src/index.ts",
+    "start:dev": "node --loader ts-node/esm src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +29,7 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.8",
+    "@types/unzipper": "^0.10.9",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
     "tsc-watch": "^6.2.0",

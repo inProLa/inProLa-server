@@ -33,7 +33,7 @@ app.get("/", async (req: Request, res: Response) => {
   try {
     const db = await client.db("admin").command({ ping: 1 });
     const gg = await authorize()
-    res.send(`Running! \n ${db} \n ${gg}`);
+    res.send(`Running! <br><br> Database<br> ${JSON.stringify(db)} <br><br>Google Drive<br> ${JSON.stringify(gg)}`);
   } catch (e) {
     res.send(e)
   }
@@ -57,10 +57,10 @@ app.get("/downloadAndProcess", async (req: Request, res: Response) => {
           await myBase.getSummary();
           await myBase.getTitle();
           await myBase.getAbstract();
-
-          res.send('Finished');
         });
-      }).catch(e => res.send(e));
+      })
+      .then(() => res.send('Finished'))
+      .catch(e => res.send(e));
 });
 
 app.listen(port, () => {
