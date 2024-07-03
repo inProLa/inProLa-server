@@ -1,9 +1,8 @@
 import { Base } from "javascript-plugin-architecture-with-typescript-definitions";
-import { getTexFileContent } from "../utils";
 
-export function getConclusion(base: Base) {
+export function getAbstract(base: Base) {
   return {
-      getConclusion: () => {
+    getAbstract: () => {
         if (!base.options.texContent) return;
         let texContent = base.options.texContent;
 

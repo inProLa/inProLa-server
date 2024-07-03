@@ -1,5 +1,4 @@
 import { Base } from "javascript-plugin-architecture-with-typescript-definitions";
-import { getTexFileContent } from "../utils";
 
 export function getSummary(base: Base) {
     return {
