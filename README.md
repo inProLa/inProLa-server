@@ -8,6 +8,10 @@ Primeiramente será necessário instalar alguns programas em seu computador para
 
   Para instalar o node.js no windows, acesse este [link](https://nodejs.org/), baixe e instale a última versão do node. Para confirmar que a instalação está ok, abra o console e rode ``node -v``, caso a resposta for uma versão, significa que está tudo ok.
 
+- Git
+
+  O git é utilizado para o controle de versões do projeto, para instalalo basta baixar o seu instalador neste [link](https://git-scm.com/downloads).
+
 - Gmail do InProLa
 
   Solicite ao responsável pelo projeto o acesso ao email, pois neste primeiro momento será necessário para adquirir os tokens de acesso.
