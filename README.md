@@ -39,13 +39,16 @@ Para conseguir rodar o projeto é necessário um conjunto de credenciais para qu
     - Se a sua credencial já estiver sido criada antes, procure o sou nome e sobrenome e no canto direito clique no ícone com uma seta para baixo e aguarde o download ser concluído, após isso mova este arquivo para a pasta ``certs`` criada nos passos anteriores e renomeie o arquivo para credentials.json.
     - Caso ainda não tenha credencial, clique em + Create Credentials e selecione OAuth cliend ID, na próxima tela utilize as seguintes configurações:
         - Selecione Desktop App no campo de Application Type;
-        - Name coloque o seu nome e sobrenome;
+        - Preenchar os próximos campos tal qual abaixo:
+        - Name: o seu nome e sobrenome;
+        - Authorised JavaScript origins: http://localhost:3030
+        - Authorised redirect URIs: http://localhost:3030/oauth2callback
         - Clique em Create para finalizar o cadastro;
         - Após criar a sua credencial a página irá retornar para a tela de credenciais e irá abrir um modal, clique em Download Json e aguarde o seu navegador baixar o arquivo;
         - Mova o arquivo baixado para a pasta ``certs`` criada nos passos anteriores e renomeie o arquivo para credentials.json.
     - Para finalizar, um console na raiz do projeto e siga os seguintes passos:
         - Rode o comando npm install e após finalizar rode npm run start;
-        - O projeto irá abrir o seu navegador e pedir para autorizar o acesso, selecione a conta do gmail do InProLa e clique em continuar;
+        - Acesse este [link](https://localhost.com/3000) e o  pedir para autorizar o acesso, selecione a conta do gmail do InProLa e clique em continuar;
         - Na tela seguinte marque as 2 caixinhas e clique em finalizar.
           Após isso, deverá ser possível ver uma mensagem na tela do seu navegador e o seu projeto terá tudo necessário para funcionar.
 
