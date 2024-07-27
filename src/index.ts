@@ -22,7 +22,7 @@ dotenv.config();
       });
       await myBase.getSummary();
       await myBase.getTitle();
-      // await myBase.getConclusion();
+      await myBase.getAbstract();
     });
   }).catch((e) => {res.send(e)}).finally(() => {
       res.send('Finished')

@@ -1,4 +1,6 @@
-
+- [Vídeo configurando o projet](https://drive.google.com/file/d/1IOlz9qidVC3JygaT9BewAE1KrBYrrJqf/view?usp=drive_link)
+- [Vídeo rodando o projeto](https://drive.google.com/file/d/1scfrj-0ZVy0WxN3mdvU-9iSAsce9y-AP/view?usp=drive_link)
+- [Vídeo importando um novo plugin](https://drive.google.com/file/d/17MabwFyEOGlJxOWrjrr9Zuq_D4oexGYB/view?usp=drive_link)
 # InProLa
 
 InProLa é um projeto desenvolvido utilizando arquitetura plugavel para processar e indexar artigos cientificos escritos em Latex.
