@@ -14,4 +14,4 @@ declare module "javascript-plugin-architecture-with-typescript-definitions" {
     }
   }
 
-export const MyBase = Base.withPlugins([getTitle, getAbstract, getSummary]);
+export const MyBase = Base.withPlugins([getTitle, getSummary, getAbstract]);
