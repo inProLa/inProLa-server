@@ -1,5 +1,0 @@
-{
-  "watch": ["src", "latexProjects"],
-  "ext": "ts",
-  "exec": "ts-node ./src/index.ts"
-}
