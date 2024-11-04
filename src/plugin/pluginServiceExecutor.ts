@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ProcessamentoServiceInterface } from '../../common/processamentoServiceInterface';
+import { ProcessamentoServiceInterface } from '../../common/models/processamento-service-interface';
 import { DiscoveryService, Reflector } from '@nestjs/core';
+import { PluginPayload } from '../../common/models/plugin-payload';
 
 @Injectable()
 export class DynamicServiceExecutor implements OnModuleInit {
@@ -24,9 +25,9 @@ export class DynamicServiceExecutor implements OnModuleInit {
     });
   }
 
-  async executeAll(valor: string) {
+  async executeAll(payload: PluginPayload) {
     for (const service of this.services) {
-      await service.Processamento(valor);
+      await service.Processamento(payload);
     }
   }
 }

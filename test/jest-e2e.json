@@ -12,6 +12,10 @@
   },
   "moduleNameMapper": {
     "@app/plugin-b/(.*)": "<rootDir>/../libs/plugin-b/src/$1",
-    "@app/plugin-b": "<rootDir>/../libs/plugin-b/src"
+    "@app/plugin-b": "<rootDir>/../libs/plugin-b/src",
+    "@app/frameworks/(.*)": "<rootDir>/../libs/names/frameworks/src/$1",
+    "@app/frameworks": "<rootDir>/../libs/names/frameworks/src",
+    "@app/frameworks-names/(.*)": "<rootDir>/../libs/frameworks-names/src/$1",
+    "@app/frameworks-names": "<rootDir>/../libs/frameworks-names/src"
   }
 }

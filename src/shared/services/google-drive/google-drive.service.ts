@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as unzipper from 'unzipper';
 import Drive = drive_v3.Drive;
 import { OAuth2Client } from 'google-auth-library';
+import { DriveFile } from './drive-file';
 
 @Injectable()
 export class GoogleDriveService {
@@ -89,28 +90,31 @@ export class GoogleDriveService {
 
     return await Promise.all(
       files.map(async (file) => {
-        return await this.downloadFile(file.id as string);
+        const texText = await this.downloadFile(file.id as string);
+        return { texText, fileId: file.id } as DriveFile;
       }),
     );
   }
 
-  async downloadFile(fileId: string) {
-    const folderPath = path.join(process.cwd(), './latexProjects', fileId);
-
+  async downloadFile(fileId: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        if (!fs.existsSync(folderPath)) {
-          fs.mkdirSync(folderPath);
+        const response = await this.drive.files.get(
+          { fileId, alt: 'media' },
+          { responseType: 'arraybuffer' },
+        );
+        const buffer = Buffer.from(response.data as ArrayBuffer);
+        const directory = await unzipper.Open.buffer(buffer);
+
+        for (const file of directory.files) {
+          if (file.path.endsWith('.tex')) {
+            const content = await file.buffer();
+            resolve(content.toString('utf-8'));
+            return;
+          }
         }
 
-        this.drive.files
-          .get({ fileId, alt: 'media' }, { responseType: 'arraybuffer' })
-          .then((response) => {
-            this.extrairArquivoZip(
-              Buffer.from(response.data as ArrayBuffer),
-              folderPath,
-            ).then(resolve);
-          });
+        reject(new Error('No .tex file found in the zip archive.'));
       } catch (error) {
         console.error(
           'An error occurred while downloading or extracting the file:',

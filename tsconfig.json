@@ -16,7 +16,21 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/frameworks": [
+        "libs/names/frameworks/src"
+      ],
+      "@app/frameworks/*": [
+        "libs/names/frameworks/src/*"
+      ],
+      "@app/frameworks-names": [
+        "libs/frameworks-names/src"
+      ],
+      "@app/frameworks-names/*": [
+        "libs/frameworks-names/src/*"
+      ]
+    }
   },
   "paths": {
     "@app/libs/*": [
