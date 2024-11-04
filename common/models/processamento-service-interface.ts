@@ -1,5 +1,7 @@
-import { PluginPayload } from './plugin-payload';
+import { PluginProcessPayload } from './plugin-process-payload';
+import { PluginSearchPayload } from './plugin-search-payload';
 
 export interface ProcessamentoServiceInterface {
-  Processamento(valor: PluginPayload): Promise<void>;
+  Processamento(payload: PluginProcessPayload): Promise<void>;
+  Busca(payload: PluginSearchPayload): Promise<Array<string>>;
 }

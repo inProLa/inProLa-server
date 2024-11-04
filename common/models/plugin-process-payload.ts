@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { DriveFile } from '../../src/shared/services/google-drive/drive-file';
 
-export class PluginPayload {
+export class PluginProcessPayload {
   texFile: DriveFile;
   dataBaseClient: MongoClient;
 

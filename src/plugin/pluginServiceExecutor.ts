@@ -1,7 +1,8 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ProcessamentoServiceInterface } from '../../common/models/processamento-service-interface';
 import { DiscoveryService, Reflector } from '@nestjs/core';
-import { PluginPayload } from '../../common/models/plugin-payload';
+import { PluginProcessPayload } from '../../common/models/plugin-process-payload';
+import { PluginSearchPayload } from '../../common/models/plugin-search-payload';
 
 @Injectable()
 export class DynamicServiceExecutor implements OnModuleInit {
@@ -25,9 +26,22 @@ export class DynamicServiceExecutor implements OnModuleInit {
     });
   }
 
-  async executeAll(payload: PluginPayload) {
+  async executeAllProcessamentoFunctions(payload: PluginProcessPayload) {
     for (const service of this.services) {
       await service.Processamento(payload);
     }
+  }
+
+  async executeAllBuscaFunctions(
+    payload: PluginSearchPayload,
+  ): Promise<Array<string>> {
+    const filesIds = [];
+
+    for (const service of this.services) {
+      const respose = await service.Busca(payload);
+      filesIds.push(respose);
+    }
+
+    return filesIds;
   }
 }

@@ -90,46 +90,47 @@ export class GoogleDriveService {
 
     return await Promise.all(
       files.map(async (file) => {
-        const texText = await this.downloadFile(file.id as string);
+        const texText = await this.getTexFileText(file.id as string);
         return { texText, fileId: file.id } as DriveFile;
       }),
     );
   }
 
-  async downloadFile(fileId: string): Promise<string> {
+  async getTexFileText(fileId: string) {
     return new Promise(async (resolve, reject) => {
-      try {
-        const response = await this.drive.files.get(
-          { fileId, alt: 'media' },
-          { responseType: 'arraybuffer' },
-        );
-        const buffer = Buffer.from(response.data as ArrayBuffer);
-        const directory = await unzipper.Open.buffer(buffer);
+      this.downloadFile(fileId)
+        .then(async (buffer) => {
+          const directory = await unzipper.Open.buffer(buffer);
 
-        for (const file of directory.files) {
-          if (file.path.endsWith('.tex')) {
-            const content = await file.buffer();
-            resolve(content.toString('utf-8'));
-            return;
+          for (const file of directory.files) {
+            if (file.path.endsWith('.tex')) {
+              const content = await file.buffer();
+              resolve(content.toString('utf-8'));
+              return;
+            }
           }
-        }
 
-        reject(new Error('No .tex file found in the zip archive.'));
-      } catch (error) {
-        console.error(
-          'An error occurred while downloading or extracting the file:',
-          error,
-        );
-        reject(error);
-      }
+          reject(new Error('No .tex file found in the zip archive.'));
+        })
+        .catch((error) => {
+          console.error(
+            'An error occurred while downloading or extracting the file:',
+            error,
+          );
+          reject(error);
+        });
     });
   }
 
-  async extrairArquivoZip(buffer: Buffer, folderPath: string): Promise<any> {
-    const stream = await unzipper.Open.buffer(buffer);
-
-    return await stream.extract({
-      path: folderPath,
-    });
+  async downloadFile(fileId: string): Promise<Buffer> {
+    try {
+      const response = await this.drive.files.get(
+        { fileId, alt: 'media' },
+        { responseType: 'arraybuffer' },
+      );
+      return Buffer.from(response.data as ArrayBuffer);
+    } catch (error) {
+      console.error('An error occurred while downloading the file:', error);
+    }
   }
 }

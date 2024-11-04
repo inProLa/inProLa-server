@@ -16,7 +16,7 @@ export class ProcessamentoController {
     try {
       await this.googleService.listFiles().then((files) =>
         files.forEach(async (file) => {
-          await this.dynamicServiceExecutor.executeAll({
+          await this.dynamicServiceExecutor.executeAllProcessamentoFunctions({
             texFile: file,
             dataBaseClient: this.databaseService.client,
           });
