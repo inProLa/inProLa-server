@@ -16,6 +16,8 @@
     "@app/frameworks/(.*)": "<rootDir>/../libs/names/frameworks/src/$1",
     "@app/frameworks": "<rootDir>/../libs/names/frameworks/src",
     "@app/frameworks-names/(.*)": "<rootDir>/../libs/frameworks-names/src/$1",
-    "@app/frameworks-names": "<rootDir>/../libs/frameworks-names/src"
+    "@app/frameworks-names": "<rootDir>/../libs/frameworks-names/src",
+    "@app/author/(.*)": "<rootDir>/../libs/author/src/$1",
+    "@app/author": "<rootDir>/../libs/author/src"
   }
 }

@@ -1,2 +1,2 @@
-export * from './frameworks-names.module';
-export * from './frameworks-names.service';
+export * from './frameworks.module';
+export * from './frameworks.service';

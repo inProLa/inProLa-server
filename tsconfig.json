@@ -29,6 +29,12 @@
       ],
       "@app/frameworks-names/*": [
         "libs/frameworks-names/src/*"
+      ],
+      "@app/author": [
+        "libs/author/src"
+      ],
+      "@app/author/*": [
+        "libs/author/src/*"
       ]
     }
   },

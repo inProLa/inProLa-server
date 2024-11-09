@@ -1,12 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ProcessamentoServiceInterface } from '../../common/models/processamento-service-interface';
 import { DiscoveryService, Reflector } from '@nestjs/core';
 import { PluginProcessPayload } from '../../common/models/plugin-process-payload';
 import { PluginSearchPayload } from '../../common/models/plugin-search-payload';
+import { PluginServiceInterface } from '../../common/models/plugin-service-interface';
 
 @Injectable()
 export class DynamicServiceExecutor implements OnModuleInit {
-  private services: ProcessamentoServiceInterface[] = [];
+  private services: PluginServiceInterface[] = [];
 
   constructor(
     private readonly discoveryService: DiscoveryService,
@@ -19,7 +19,7 @@ export class DynamicServiceExecutor implements OnModuleInit {
       const instance = provider.instance;
       if (
         instance &&
-        this.reflector.get('isProcessamentoService', instance.constructor)
+        this.reflector.get('isPluginService', instance.constructor)
       ) {
         this.services.push(instance);
       }

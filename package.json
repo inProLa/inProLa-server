@@ -80,7 +80,8 @@
     "moduleNameMapper": {
       "^@app/plugin-b(|/.*)$": "<rootDir>/libs/plugin-b/src/$1",
       "^@app/frameworks(|/.*)$": "<rootDir>/libs/names/frameworks/src/$1",
-      "^@app/frameworks-names(|/.*)$": "<rootDir>/libs/frameworks-names/src/$1"
+      "^@app/frameworks-names(|/.*)$": "<rootDir>/libs/frameworks-names/src/$1",
+      "^@app/author(|/.*)$": "<rootDir>/libs/author/src/$1"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 import { GoogleDriveService } from '../../shared/services/google-drive/google-drive.service';
 import { DynamicServiceExecutor } from '../../plugin/pluginServiceExecutor';
 import { DatabaseService } from '../../shared/services/database/database.service';
@@ -7,11 +7,11 @@ import { DatabaseService } from '../../shared/services/database/database.service
 export class ProcessamentoController {
   constructor(
     private googleService: GoogleDriveService,
-    private dynamicServiceExecutor: DynamicServiceExecutor,
+    private readonly dynamicServiceExecutor: DynamicServiceExecutor,
     private databaseService: DatabaseService,
   ) {}
 
-  @Get()
+  @Post()
   async downloadAndProcess() {
     try {
       await this.googleService.listFiles().then((files) =>

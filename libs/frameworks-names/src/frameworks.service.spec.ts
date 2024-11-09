@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FrameworksNamesService } from './frameworks-names.service';
+import { FrameworksService } from './frameworks.service';
 
 describe('FrameworksNamesService', () => {
-  let service: FrameworksNamesService;
+  let service: FrameworksService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FrameworksNamesService],
+      providers: [FrameworksService],
     }).compile();
 
-    service = module.get<FrameworksNamesService>(FrameworksNamesService);
+    service = module.get<FrameworksService>(FrameworksService);
   });
 
   it('should be defined', () => {
