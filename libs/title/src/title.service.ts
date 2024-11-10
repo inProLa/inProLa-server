@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { PluginService } from '../../../common/pluginService.decorator';
 import { PluginServiceInterface } from '../../../common/models/plugin-service-interface';
 import { PluginProcessPayload } from '../../../common/models/plugin-process-payload';
 import { PluginSearchPayload } from '../../../common/models/plugin-search-payload';
+import { PluginService } from '../../../common/pluginService.decorator';
 
 @Injectable()
 @PluginService()
-export class AuthorService implements PluginServiceInterface {
+export class TitleService implements PluginServiceInterface {
   async process(payload: PluginProcessPayload): Promise<void> {
-    const authors = this.extractAuthors(payload.texFile.texText);
+    const texContent = payload.texFile.texText;
+    const firstPart = texContent.split(String.raw`\title{`)[1];
+    const titleText = firstPart.split('}')[0];
 
     await payload.dataBaseClient
       .db('plugins')
@@ -18,7 +20,7 @@ export class AuthorService implements PluginServiceInterface {
         {
           $set: {
             fileId: payload.texFile.fileId,
-            authors: authors,
+            title: titleText,
           },
         },
         { upsert: true },
@@ -32,23 +34,7 @@ export class AuthorService implements PluginServiceInterface {
     return await payload.dataBaseClient
       .db('plugins')
       .collection('academic_works')
-      .find({ authors: { $regex: regex } })
+      .find({ title: { $regex: regex } })
       .toArray();
-  }
-
-  extractAuthors(texText: string): string[] {
-    const authorPattern = /\\author\{([^}]*)\}/;
-    const match = texText.match(authorPattern);
-
-    if (!match) {
-      return [];
-    }
-
-    const authorsText = match[1];
-    const authors = authorsText
-      .split(/,(?![^{]*\})/) // Split by comma not within braces
-      .map((author) => author.replace(/\\inst\{.*$/, '').trim());
-
-    return authors;
   }
 }

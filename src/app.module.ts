@@ -1,13 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ProcessamentoModule } from './processamento/processamento.module';
-import { BuscaModule } from './busca/busca.module';
+import { Process } from './process/process';
+import { SearchModule } from './search/search.module';
 import { PluginModule } from './plugin/plugin.module';
 
 @Module({
-  imports: [
-    ProcessamentoModule,
-    BuscaModule,
-    PluginModule.registerPluginsAsync(),
-  ],
+  imports: [Process, SearchModule, PluginModule.registerPluginsAsync()],
 })
 export class AppModule {}

@@ -30,20 +30,20 @@ export class FrameworksService implements PluginServiceInterface {
     'Phoenix',
   ];
 
-  async Processamento(payload: PluginProcessPayload): Promise<void> {
+  async process(payload: PluginProcessPayload): Promise<void> {
     const foundFrameworks: string[] = this.foundedFrameworks(
       payload.texFile.texText,
     );
 
     await payload.dataBaseClient
       .db('plugins')
-      .collection('frameworks')
+      .collection('academic_works')
       .updateOne(
         { fileId: payload.texFile.fileId },
         {
           $set: {
             fileId: payload.texFile.fileId,
-            foundFrameworks,
+            frameworks: foundFrameworks,
           },
         },
         { upsert: true },
@@ -51,15 +51,14 @@ export class FrameworksService implements PluginServiceInterface {
       .catch((err) => console.error(err));
   }
 
-  async Busca(payload: PluginSearchPayload): Promise<Array<string>> {
+  async search(payload: PluginSearchPayload): Promise<Array<any>> {
     const frameworksDetected = await this.foundedFrameworks(payload.searchText);
 
     return await payload.dataBaseClient
       .db('plugins')
-      .collection('frameworks')
+      .collection('academic_works')
       .find({ foundFrameworks: { $in: frameworksDetected } })
-      .toArray()
-      .then((res) => res.map((r) => r.fileId));
+      .toArray();
   }
 
   private foundedFrameworks(text: string): string[] {

@@ -84,10 +84,6 @@ export class GoogleDriveService {
       return;
     }
 
-    if (!fs.existsSync('./latexProjects')) {
-      fs.mkdirSync('./latexProjects');
-    }
-
     return await Promise.all(
       files.map(async (file) => {
         const texText = await this.getTexFileText(file.id as string);

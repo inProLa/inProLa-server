@@ -6,9 +6,11 @@ import { PluginSearchPayload } from '../../../common/models/plugin-search-payloa
 
 @Injectable()
 @PluginService()
-export class AuthorService implements PluginServiceInterface {
+export class AbstractService implements PluginServiceInterface {
   async process(payload: PluginProcessPayload): Promise<void> {
-    const authors = this.extractAuthors(payload.texFile.texText);
+    const texContent = payload.texFile.texText;
+    const firstPart = texContent.split(String.raw`\begin{resumo} `)[1];
+    const summaryText = firstPart.split(String.raw`\end{resumo}`)[0];
 
     await payload.dataBaseClient
       .db('plugins')
@@ -18,37 +20,20 @@ export class AuthorService implements PluginServiceInterface {
         {
           $set: {
             fileId: payload.texFile.fileId,
-            authors: authors,
+            summary: summaryText,
           },
         },
         { upsert: true },
       )
       .catch((err) => console.error(err));
   }
-
   async search(payload: PluginSearchPayload): Promise<Array<any>> {
     const regex = new RegExp(payload.searchText, 'i');
 
     return await payload.dataBaseClient
       .db('plugins')
       .collection('academic_works')
-      .find({ authors: { $regex: regex } })
+      .find({ summary: { $regex: regex } })
       .toArray();
-  }
-
-  extractAuthors(texText: string): string[] {
-    const authorPattern = /\\author\{([^}]*)\}/;
-    const match = texText.match(authorPattern);
-
-    if (!match) {
-      return [];
-    }
-
-    const authorsText = match[1];
-    const authors = authorsText
-      .split(/,(?![^{]*\})/) // Split by comma not within braces
-      .map((author) => author.replace(/\\inst\{.*$/, '').trim());
-
-    return authors;
   }
 }

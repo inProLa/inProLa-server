@@ -26,22 +26,22 @@ export class DynamicServiceExecutor implements OnModuleInit {
     });
   }
 
-  async executeAllProcessamentoFunctions(payload: PluginProcessPayload) {
+  async executeAllProcessFunctions(payload: PluginProcessPayload) {
     for (const service of this.services) {
-      await service.Processamento(payload);
+      await service.process(payload);
     }
   }
 
-  async executeAllBuscaFunctions(
+  async executeAllSearchFunctions(
     payload: PluginSearchPayload,
-  ): Promise<Array<string>> {
-    const filesIds = [];
+  ): Promise<Array<Array<any>>> {
+    const files = [];
 
     for (const service of this.services) {
-      const respose = await service.Busca(payload);
-      filesIds.push(respose);
+      const respose = await service.search(payload);
+      files.push(respose);
     }
 
-    return filesIds;
+    return files;
   }
 }

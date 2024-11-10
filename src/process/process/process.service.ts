@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
-export class ProcessamentoService {
+export class ProcessService {
   async processTexFilesInLatexFolders() {
     const baseDirectory = './latexProjects';
     const texContents: Array<{ texName: string; texContent: string }> = [];

@@ -35,6 +35,18 @@
       ],
       "@app/author/*": [
         "libs/author/src/*"
+      ],
+      "@app/abstract": [
+        "libs/abstract/src"
+      ],
+      "@app/abstract/*": [
+        "libs/abstract/src/*"
+      ],
+      "@app/title": [
+        "libs/title/src"
+      ],
+      "@app/title/*": [
+        "libs/title/src/*"
       ]
     }
   },

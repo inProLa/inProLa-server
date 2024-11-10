@@ -3,8 +3,8 @@ import { GoogleDriveService } from '../../shared/services/google-drive/google-dr
 import { DynamicServiceExecutor } from '../../plugin/pluginServiceExecutor';
 import { DatabaseService } from '../../shared/services/database/database.service';
 
-@Controller('processamento')
-export class ProcessamentoController {
+@Controller('process')
+export class ProcessController {
   constructor(
     private googleService: GoogleDriveService,
     private readonly dynamicServiceExecutor: DynamicServiceExecutor,
@@ -16,7 +16,7 @@ export class ProcessamentoController {
     try {
       await this.googleService.listFiles().then((files) =>
         files.forEach(async (file) => {
-          await this.dynamicServiceExecutor.executeAllProcessamentoFunctions({
+          await this.dynamicServiceExecutor.executeAllProcessFunctions({
             texFile: file,
             dataBaseClient: this.databaseService.client,
           });

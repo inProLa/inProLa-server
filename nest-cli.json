@@ -15,6 +15,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/author/tsconfig.lib.json"
       }
+    },
+    "abstract": {
+      "type": "library",
+      "root": "libs/abstract",
+      "entryFile": "index",
+      "sourceRoot": "libs/abstract/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/abstract/tsconfig.lib.json"
+      }
+    },
+    "title": {
+      "type": "library",
+      "root": "libs/title",
+      "entryFile": "index",
+      "sourceRoot": "libs/title/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/title/tsconfig.lib.json"
+      }
     }
   }
 }
