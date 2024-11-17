@@ -3,6 +3,8 @@ import { Response } from 'express';
 import { DynamicServiceExecutor } from '../../plugin/pluginServiceExecutor';
 import { DatabaseService } from '../../shared/services/database/database.service';
 import { GoogleDriveService } from '../../shared/services/google-drive/google-drive.service';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 
 @Controller('search')
 export class SearchController {
@@ -32,13 +34,29 @@ export class SearchController {
       });
   }
 
-  @Get('download')
-  async downloadFiles(@Query('fileId') fileId: string, @Res() res: Response) {
+  @Get('download/zip')
+  async downloadZipFile(@Query('fileId') fileId: string, @Res() res: Response) {
     const buffer = await this.googleDriveService.downloadFile(fileId);
     res.set({
       'Content-Type': 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${fileId}.zip"`,
     });
     res.send(buffer);
+  }
+
+  @Get('download/pdf')
+  async downloadPdfFile(@Query('fileId') fileId: string, @Res() res: Response) {
+    const filePath = path.join(process.cwd(), 'latexProjects', `${fileId}.pdf`);
+
+    if (fs.existsSync(filePath)) {
+      const buffer = fs.readFileSync(filePath);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${fileId}.pdf"`,
+      });
+      res.send(buffer);
+    } else {
+      res.status(404).send('Não foi possível encontrar o arquivo PDF');
+    }
   }
 }
