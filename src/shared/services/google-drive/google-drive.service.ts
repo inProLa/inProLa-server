@@ -7,6 +7,7 @@ import * as unzipper from 'unzipper';
 import Drive = drive_v3.Drive;
 import { OAuth2Client } from 'google-auth-library';
 import { DriveFile } from './drive-file';
+import * as process from 'node:process';
 
 @Injectable()
 export class GoogleDriveService {
@@ -86,25 +87,44 @@ export class GoogleDriveService {
 
     return await Promise.all(
       files.map(async (file) => {
-        const texText = await this.getTexFileText(file.id as string);
+        const texText = await this.getTexFileTextAndDownloadPdf(
+          file.id as string,
+        );
         return { texText, fileId: file.id } as DriveFile;
       }),
     );
   }
 
-  async getTexFileText(fileId: string) {
+  async getTexFileTextAndDownloadPdf(fileId: string) {
     return new Promise(async (resolve, reject) => {
       this.downloadFile(fileId)
         .then(async (buffer) => {
           const directory = await unzipper.Open.buffer(buffer);
+          let texText = '';
 
           for (const file of directory.files) {
             if (file.path.endsWith('.tex')) {
               const content = await file.buffer();
-              resolve(content.toString('utf-8'));
-              return;
+              texText = content.toString('utf-8');
+            }
+
+            if (file.path.endsWith('.pdf')) {
+              const content = await file.buffer();
+              const filePath = path.join(
+                process.cwd(),
+                'latexProjects',
+                `${fileId}.pdf`,
+              );
+
+              if (fs.existsSync(filePath)) {
+                fs.writeFileSync(filePath, content);
+              } else {
+                fs.writeFileSync(filePath, content);
+              }
             }
           }
+
+          if (texText) resolve(texText);
 
           reject(new Error('No .tex file found in the zip archive.'));
         })
