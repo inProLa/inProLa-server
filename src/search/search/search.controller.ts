@@ -16,11 +16,15 @@ export class SearchController {
 
   @Get()
   async getSearch(
-    @Query('searchText') searchText: string,
+    @Query('searchText') searchText: string = '',
+    @Query('filters') filters: string[] = [],
   ): Promise<Array<string>> {
+    filters = typeof filters === 'string' ? [filters] : filters;
+
     return await this.dynamicServiceExecutor
       .executeAllSearchFunctions({
-        searchText: searchText,
+        searchText,
+        filters: filters,
         dataBaseClient: this.databaseService.client,
       })
       .then((files) => {
@@ -58,5 +62,10 @@ export class SearchController {
     } else {
       res.status(404).send('Não foi possível encontrar o arquivo PDF');
     }
+  }
+
+  @Get('filters')
+  async getFiltersNames(): Promise<string[]> {
+    return this.dynamicServiceExecutor.getFiltersNames();
   }
 }

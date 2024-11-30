@@ -57,7 +57,7 @@ export class FrameworksService implements PluginServiceInterface {
     return await payload.dataBaseClient
       .db('plugins')
       .collection('academic_works')
-      .find({ foundFrameworks: { $in: frameworksDetected } })
+      .find({ frameworks: { $in: frameworksDetected } })
       .toArray();
   }
 
@@ -65,5 +65,9 @@ export class FrameworksService implements PluginServiceInterface {
     return this.frameworksNames.filter((framework) =>
       text.toLowerCase().includes(framework?.toLowerCase()),
     );
+  }
+
+  get filterName(): string {
+    return 'Frameworks';
   }
 }

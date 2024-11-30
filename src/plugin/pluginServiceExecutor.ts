@@ -38,10 +38,19 @@ export class DynamicServiceExecutor implements OnModuleInit {
     const files = [];
 
     for (const service of this.services) {
-      const respose = await service.search(payload);
-      files.push(respose);
+      if (
+        payload?.filters?.length == 0 ||
+        payload?.filters?.includes(service.filterName)
+      ) {
+        const respose = await service.search(payload);
+        files.push(respose);
+      }
     }
 
     return files;
+  }
+
+  async getFiltersNames(): Promise<string[]> {
+    return this.services.map((service) => service.filterName);
   }
 }

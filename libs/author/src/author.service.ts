@@ -51,4 +51,8 @@ export class AuthorService implements PluginServiceInterface {
 
     return authors;
   }
+
+  get filterName(): string {
+    return 'Autor';
+  }
 }

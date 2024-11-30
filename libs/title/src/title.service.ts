@@ -37,4 +37,8 @@ export class TitleService implements PluginServiceInterface {
       .find({ title: { $regex: regex } })
       .toArray();
   }
+
+  get filterName(): string {
+    return 'Título';
+  }
 }

@@ -36,4 +36,8 @@ export class AbstractService implements PluginServiceInterface {
       .find({ summary: { $regex: regex } })
       .toArray();
   }
+
+  get filterName(): string {
+    return 'Resumo';
+  }
 }
