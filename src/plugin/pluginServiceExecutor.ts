@@ -34,16 +34,16 @@ export class DynamicServiceExecutor implements OnModuleInit {
 
   async executeAllSearchFunctions(
     payload: PluginSearchPayload,
-  ): Promise<Array<Array<any>>> {
-    const files = [];
+  ): Promise<Array<any>> {
+    let files = [];
 
     for (const service of this.services) {
       if (
         payload?.filters?.length == 0 ||
         payload?.filters?.includes(service.filterName)
       ) {
-        const respose = await service.search(payload);
-        files.push(respose);
+        const response = await service.search(payload);
+        files = [...files, ...response];
       }
     }
 

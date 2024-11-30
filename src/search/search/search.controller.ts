@@ -18,24 +18,24 @@ export class SearchController {
   async getSearch(
     @Query('searchText') searchText: string = '',
     @Query('filters') filters: string[] = [],
-  ): Promise<Array<string>> {
+  ): Promise<Array<object>> {
     filters = typeof filters === 'string' ? [filters] : filters;
 
-    return await this.dynamicServiceExecutor
-      .executeAllSearchFunctions({
-        searchText,
-        filters: filters,
-        dataBaseClient: this.databaseService.client,
-      })
-      .then((files) => {
-        const uniqueFiles = new Set<string>();
-        files.forEach((fileArray) => {
-          fileArray.forEach((file) => {
-            uniqueFiles.add(file);
-          });
-        });
-        return Array.from(uniqueFiles);
-      });
+    const files = await this.dynamicServiceExecutor.executeAllSearchFunctions({
+      searchText,
+      filters: filters,
+      dataBaseClient: this.databaseService.client,
+    });
+
+    const uniqueFiles = new Map<string, object>();
+    files.forEach((file) => {
+      const uniqueKey = file['fileId']; // Assuming 'fileId' is the unique property
+      if (!uniqueFiles.has(uniqueKey)) {
+        uniqueFiles.set(uniqueKey, file);
+      }
+    });
+
+    return Array.from(uniqueFiles.values());
   }
 
   @Get('download/zip')
