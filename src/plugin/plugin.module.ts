@@ -13,6 +13,7 @@ export const PLUGIN_PATH = path.normalize(
   imports: [DiscoveryModule],
   controllers: [PluginController],
   providers: [DynamicServiceExecutor],
+  exports: [DynamicServiceExecutor],
 })
 export class PluginModule {
   public static pluginsArray: Plugin[] = [];
@@ -32,8 +33,6 @@ export class PluginModule {
     });
 
     return Promise.all(loadedPlugins).then((allPlugins: DynamicModule[]) => {
-      // console.log('All modules resolved: ', allPlugins.length, 'plugins');
-
       if (allPlugins.length > 0) {
         allPlugins.forEach((module: DynamicModule) => {
           const foundModuleEntryName = Object.keys(module).find((key) =>

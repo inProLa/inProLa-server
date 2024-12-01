@@ -7,6 +7,8 @@ import * as unzipper from 'unzipper';
 import Drive = drive_v3.Drive;
 import { OAuth2Client } from 'google-auth-library';
 import { DriveFile } from './drive-file';
+import * as process from 'node:process';
+import { Readable } from 'stream';
 
 @Injectable()
 export class GoogleDriveService {
@@ -84,52 +86,130 @@ export class GoogleDriveService {
       return;
     }
 
-    if (!fs.existsSync('./latexProjects')) {
-      fs.mkdirSync('./latexProjects');
-    }
-
     return await Promise.all(
       files.map(async (file) => {
-        const texText = await this.downloadFile(file.id as string);
+        const texText = await this.getTexFileTextAndDownloadPdf(
+          file.id as string,
+        );
         return { texText, fileId: file.id } as DriveFile;
       }),
     );
   }
 
-  async downloadFile(fileId: string): Promise<string> {
+  async getTexFileTextAndDownloadPdf(fileId: string) {
     return new Promise(async (resolve, reject) => {
-      try {
-        const response = await this.drive.files.get(
-          { fileId, alt: 'media' },
-          { responseType: 'arraybuffer' },
-        );
-        const buffer = Buffer.from(response.data as ArrayBuffer);
-        const directory = await unzipper.Open.buffer(buffer);
+      this.downloadFile(fileId)
+        .then(async (buffer) => {
+          const directory = await unzipper.Open.buffer(buffer);
+          let texText = '';
 
-        for (const file of directory.files) {
-          if (file.path.endsWith('.tex')) {
-            const content = await file.buffer();
-            resolve(content.toString('utf-8'));
-            return;
+          for (const file of directory.files) {
+            if (file.path.endsWith('.tex')) {
+              const content = await file.buffer();
+              texText = content.toString('utf-8');
+            }
+
+            if (file.path.endsWith('artigo.pdf')) {
+              const content = await file.buffer();
+              const filePath = path.join(
+                process.cwd(),
+                'latexProjects',
+                `${fileId}.pdf`,
+              );
+
+              if (fs.existsSync(filePath)) {
+                fs.writeFileSync(filePath, content);
+              } else {
+                fs.writeFileSync(filePath, content);
+              }
+            }
           }
-        }
 
-        reject(new Error('No .tex file found in the zip archive.'));
-      } catch (error) {
-        console.error(
-          'An error occurred while downloading or extracting the file:',
-          error,
-        );
-        reject(error);
-      }
+          if (texText) resolve(texText);
+
+          reject(new Error('No .tex file found in the zip archive.'));
+        })
+        .catch((error) => {
+          console.error(
+            'An error occurred while downloading or extracting the file:',
+            error,
+          );
+          reject(error);
+        });
     });
   }
 
-  async extrairArquivoZip(buffer: Buffer, folderPath: string): Promise<any> {
-    const stream = await unzipper.Open.buffer(buffer);
+  async downloadFile(fileId: string): Promise<Buffer> {
+    try {
+      const response = await this.drive.files.get(
+        { fileId, alt: 'media' },
+        { responseType: 'arraybuffer' },
+      );
+      return Buffer.from(response.data as ArrayBuffer);
+    } catch (error) {
+      console.error('An error occurred while downloading the file:', error);
+    }
+  }
 
-    return await stream.extract({
-      path: folderPath,
-    });
+  async uploadAndProcess(file: Express.Multer.File, title: string) {
+    try {
+      if (!(file.buffer instanceof Buffer))
+        throw new Error('Unexpected file buffer type');
+
+      const bufferStream = new Readable({
+        read() {
+          this.push(file.buffer);
+          this.push(null); // Indica o fim do stream
+        },
+      });
+
+      const fileMetadata = {
+        name: `${title}.zip`,
+        parents: [process.env.GOOGLE_FOLDER_ID],
+      };
+
+      const media = {
+        mimeType: file.mimetype,
+        body: bufferStream,
+      };
+
+      const response = await this.drive.files.create({
+        requestBody: fileMetadata,
+        media: media,
+        fields: 'id, name',
+      });
+
+      const directory = await unzipper.Open.buffer(file.buffer);
+      let texText = '';
+
+      for (const file of directory.files) {
+        if (file.path.endsWith('.tex')) {
+          const content = await file.buffer();
+          texText = content.toString('utf-8');
+        }
+
+        if (file.path.endsWith('.pdf')) {
+          const content = await file.buffer();
+          const filePath = path.join(
+            process.cwd(),
+            'latexProjects',
+            `${response.data.id}.pdf`,
+          );
+
+          if (fs.existsSync(filePath)) {
+            fs.writeFileSync(filePath, content);
+          } else {
+            fs.writeFileSync(filePath, content);
+          }
+        }
+      }
+
+      if (texText) return { texText, fileId: response.data.id } as DriveFile;
+
+      throw new Error('No .tex file found in the zip archive.');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw new Error('Error uploading file');
+    }
   }
 }
