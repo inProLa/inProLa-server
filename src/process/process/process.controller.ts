@@ -12,6 +12,7 @@ import { DynamicServiceExecutor } from '../../plugin/pluginServiceExecutor';
 import { DatabaseService } from '../../shared/services/database/database.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as unzipper from 'unzipper';
+import * as crypto from 'crypto';
 
 @Controller('process')
 export class ProcessController {
@@ -54,12 +55,17 @@ export class ProcessController {
 
       if (!hasSbcTemplate) {
         throw new Error('The zip file does not contain sbc-template.sty');
-        return;
       }
+
+      const hash = crypto
+        .createHash('sha256')
+        .update(file.buffer)
+        .digest('hex');
+      const newTitle = `${title}-${hash}`;
 
       const uploadedFile = await this.googleService.uploadAndProcess(
         file,
-        title,
+        newTitle,
       );
       await this.dynamicServiceExecutor.executeAllProcessFunctions({
         texFile: uploadedFile,
