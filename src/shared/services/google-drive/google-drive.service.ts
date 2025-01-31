@@ -18,33 +18,51 @@ export class GoogleDriveService {
     this.authorize();
   }
 
-  private async authorize(): Promise<void> {
-    const oAuth2Client: any = await this.loadSavedCredentialsIfExist();
+  public async authorize(): Promise<void> {
+    try {
+      const oAuth2Client: any = await this.loadSavedCredentialsIfExist();
 
-    if (oAuth2Client) {
-      this.drive = google.drive({
-        version: 'v3',
-        auth: oAuth2Client,
-      });
-    } else {
-      const client = await authenticate({
-        scopes: [
-          process.env.SCOPE_GOOGLE_DRIVE_API,
-          process.env.SCOPE_GOOGLE_DRIVE_API_METADATA,
-        ],
-        keyfilePath: path.join(process.cwd(), process.env.CREDENTIALS_PATH),
-      });
+      if (oAuth2Client) {
+        this.drive = google.drive({
+          version: 'v3',
+          auth: oAuth2Client,
+        });
+      } else {
+        console.log(
+          'Token não encontrado. Iniciando processo de autenticação...',
+        );
+        console.log(
+          'Por favor, aguarde a abertura do navegador e siga as instruções para autenticar.',
+        );
 
-      if (client.credentials) {
-        this.drive = google.drive({ version: 'v3', auth: client });
-        await this.saveCredentials(client);
+        const client = await authenticate({
+          scopes: [
+            process.env.SCOPE_GOOGLE_DRIVE_API,
+            process.env.SCOPE_GOOGLE_DRIVE_API_METADATA,
+          ],
+          keyfilePath: path.join(process.cwd(), process.env.CREDENTIALS_PATH),
+        });
+
+        if (client.credentials) {
+          this.drive = google.drive({ version: 'v3', auth: client });
+          await this.saveCredentials(client);
+        } else {
+          throw new Error('Failed to obtain client credentials');
+        }
       }
+    } catch (error) {
+      throw new Error(`Authorization failed: ${error.message}`);
     }
   }
 
   async loadSavedCredentialsIfExist(): Promise<OAuth2Client | null> {
     try {
       const tokenPath = path.join(process.cwd(), process.env.TOKEN_PATH);
+
+      if (!fs.existsSync(tokenPath)) {
+        return null;
+      }
+
       const token = fs.readFileSync(tokenPath, 'utf-8');
       const credentials = JSON.parse(token);
       const client = new OAuth2Client(
@@ -186,21 +204,6 @@ export class GoogleDriveService {
         if (file.path.endsWith('.tex')) {
           const content = await file.buffer();
           texText = content.toString('utf-8');
-        }
-
-        if (file.path.endsWith('.pdf')) {
-          const content = await file.buffer();
-          const filePath = path.join(
-            process.cwd(),
-            'latexProjects',
-            `${response.data.id}.pdf`,
-          );
-
-          if (fs.existsSync(filePath)) {
-            fs.writeFileSync(filePath, content);
-          } else {
-            fs.writeFileSync(filePath, content);
-          }
         }
       }
 

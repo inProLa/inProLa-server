@@ -10,4 +10,4 @@ import { DiscoveryModule } from '@nestjs/core';
   controllers: [ProcessController],
   providers: [ProcessService, DynamicServiceExecutor],
 })
-export class Process {}
+export class ProcessModule {}

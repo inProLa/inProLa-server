@@ -25,19 +25,25 @@ export class ProcessController {
   @Post()
   async downloadAndProcess() {
     try {
-      await this.googleService.listFiles().then((files) =>
-        files.forEach(async (file) => {
-          await this.dynamicServiceExecutor.executeAllProcessFunctions({
-            texFile: file,
-            dataBaseClient: this.databaseService.client,
-          });
-        }),
-      );
+      await this.googleService
+        .listFiles()
+        .then((files) =>
+          files.forEach(async (file) => {
+            await this.dynamicServiceExecutor.executeAllProcessFunctions({
+              texFile: file,
+              dataBaseClient: this.databaseService.client,
+            });
+          }),
+        )
+        .catch((error) => {
+          console.error(error);
+          throw new Error(`Error listing files: ${error}`);
+        });
 
       return { message: 'Processamento concluído', data: [] };
     } catch (error) {
       console.error(error);
-      throw new Error('Error uploading file');
+      throw new Error(`Error uploading file: ${error}`);
     }
   }
 
@@ -74,6 +80,7 @@ export class ProcessController {
 
       return { message: 'Processamento concluído', data: [] };
     } catch (error) {
+      console.error(error);
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
