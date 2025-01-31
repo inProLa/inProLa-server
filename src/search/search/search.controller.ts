@@ -68,4 +68,33 @@ export class SearchController {
   async getFiltersNames(): Promise<string[]> {
     return this.dynamicServiceExecutor.getFiltersNames();
   }
+
+  @Get('health-check')
+  async checkConnections(): Promise<{
+    database: boolean;
+    googleDrive: boolean;
+  }> {
+    const result = {
+      database: false,
+      googleDrive: false,
+    };
+
+    try {
+      // Test database connection
+      await this.databaseService.client.db().admin().ping();
+      result.database = true;
+    } catch (error) {
+      console.error('Database connection error:', error);
+    }
+
+    try {
+      // Test Google Drive connection by attempting to list files
+      await this.googleDriveService.listFiles();
+      result.googleDrive = true;
+    } catch (error) {
+      console.error('Google Drive connection error:', error);
+    }
+
+    return result;
+  }
 }
