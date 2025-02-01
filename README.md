@@ -1,85 +1,59 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# InProLa
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+InProLa é um projeto desenvolvido utilizando arquitetura plugavel para processar e indexar artigos cientificos escritos em Latex.
+## Dependencias
+Primeiramente será necessário instalar alguns programas em seu computador para que ele esteja habilitado para rodar o projeto.
+- Node.js
 
-## Description
+  Para instalar o node.js no windows, acesse este [link](https://nodejs.org/), baixe e instale a última versão do node. Para confirmar que a instalação está ok, abra o console e rode ``node -v``, caso a resposta for uma versão, significa que está tudo ok.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Gmail do InProLa
 
-## Project setup
+  Solicite ao responsável pelo projeto o acesso ao email, pois neste primeiro momento será necessário para adquirir os tokens de acesso.
+## Rodar localmente
+Para conseguir rodar o projeto é necessário um conjunto de credenciais para que as plataformas consigam identificar que o acesso está sendo realizado por pessoas autorizadas. Para isso serão necessárias 3 autenticações:
 
-```bash
-$ npm install
-```
+- .env
 
-## Compile and run the project
+    - Na raiz do projeto você irá conseguir encontrar um arquivo ``.env.exemplo``, faça uma cópia dele para a raiz do projeto e renomeie para ``.env``.
+    - Para conseguir o ``GOOGLE_FOLDER_ID`` você deve acessar o google drive do InProLa, acessar a pasta Artigos e copiar o último parâmetro da URL, por exemplo se a url for ``https://drive.google.com/drive/u/1/folders/123dasdfMasdf_asdf1234dsaf`` você deve copiar todo o conteúdo após ``folders/``, ne exemplo seria ``123dasdfMasdf_asdf1234dsaf``, e colar em no arquivo ``.env`` em frente ao ``GOOGLE_FOLDER_ID=``.
 
-```bash
-# development
-$ npm run start
+- MongoDb
+    - Para criar o seu certificado ou baixar novamente você deve acessar o site do [MongoDb](https://account.mongodb.com/), fazer login com o gmail do InProLa, ir em Database Access que fica na categoria de Security.
+        - Se você tiver criado um certificado antes, é só ir na opção de EDIT seu respectivo usuário, selecione a expiração do certificado, (aconselho por 24 meses) e clicar em Download new certificate, após o seu navegador baixar o certificado, crie uma pasta com o nome ``certs`` na raiz do projeto e cole este arquivo dentro dela.
+        - Caso for um usuário novo, você deve clicar no botão Add New Database User, e utilizar as seguintes configurações:
+            - Selecionar Certificate no Authentication Method;
+            - Colocar seu nome e sobrenome em Common Name;
+            - Marcar a caixa Download certificate when user is added;
+            - Selecionar 24 months em Certificate Expiration;
+            - Em Built-in Role, clique em Add Built-in Role e selecione Read and Write in Any Database;
+            - Por fim, clique em Add User.
+            - Após o seu navegador baixar o certificado, crie uma pasta com o nome ``certs`` na raiz do projeto e cole este arquivo dentro dela.
+- GoogleApi
+    - Faça login com o gmail do InProLa no [GoogleApi](https://console.cloud.google.com/welcome?project=inprola), após logado entre na área de [Api and Services](https://console.cloud.google.com/apis/dashboard?authuser=1&project=inprola-426821), acesse o menu de credentials no canto esquerdo.
+    - Se a sua credencial já estiver sido criada antes, procure o sou nome e sobrenome e no canto direito clique no ícone com uma seta para baixo e aguarde o download ser concluído, após isso mova este arquivo para a pasta ``certs`` criada nos passos anteriores e renomeie o arquivo para credentials.json.
+    - Caso ainda não tenha credencial, clique em + Create Credentials e selecione OAuth cliend ID, na próxima tela utilize as seguintes configurações:
+        - Selecione Desktop App no campo de Application Type;
+        - Name coloque o seu nome e sobrenome;
+        - Clique em Create para finalizar o cadastro;
+        - Após criar a sua credencial a página irá retornar para a tela de credenciais e irá abrir um modal, clique em Download Json e aguarde o seu navegador baixar o arquivo;
+        - Mova o arquivo baixado para a pasta ``certs`` criada nos passos anteriores e renomeie o arquivo para credentials.json.
+    - Para finalizar, um console na raiz do projeto e siga os seguintes passos:
+        - Rode o comando npm install e após finalizar rode npm run start;
+        - O projeto irá abrir o seu navegador e pedir para autorizar o acesso, selecione a conta do gmail do InProLa e clique em continuar;
+        - Na tela seguinte marque as 2 caixinhas e clique em finalizar.
+          Após isso, deverá ser possível ver uma mensagem na tela do seu navegador e o seu projeto terá tudo necessário para funcionar.
 
-# watch mode
-$ npm run start:dev
 
-# production mode
-$ npm run start:prod
-```
 
-## Run tests
+## EndPoints
+- GET ``/search/health-check``
 
-```bash
-# unit tests
-$ npm run test
+  Irá testar se a conexão com o banco e as credenciais do google está funcionando.
+- GET ``/process``
 
-# e2e tests
-$ npm run test:e2e
+  Processar trabalhos já baixados localmente.
+- GET ``/search``
 
-# test coverage
-$ npm run test:cov
-```
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+  Retornar uma lista dos trabalhos já indexados
