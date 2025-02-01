@@ -3,8 +3,7 @@ import { Response } from 'express';
 import { DynamicServiceExecutor } from '../../plugin/pluginServiceExecutor';
 import { DatabaseService } from '../../shared/services/database/database.service';
 import { GoogleDriveService } from '../../shared/services/google-drive/google-drive.service';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
+import * as AdmZip from 'adm-zip';
 
 @Controller('search')
 export class SearchController {
@@ -50,17 +49,43 @@ export class SearchController {
 
   @Get('download/pdf')
   async downloadPdfFile(@Query('fileId') fileId: string, @Res() res: Response) {
-    const filePath = path.join(process.cwd(), 'latexProjects', `${fileId}.pdf`);
+    try {
+      // Download the ZIP file from Google Drive
+      const zipBuffer = await this.googleDriveService.downloadFile(fileId);
 
-    if (fs.existsSync(filePath)) {
-      const buffer = fs.readFileSync(filePath);
+      // Create a new instance of AdmZip with the downloaded buffer
+      const zip = new AdmZip(zipBuffer);
+
+      // Find the PDF file in the ZIP
+      const pdfEntry = zip
+        .getEntries()
+        .find((entry) => entry.entryName.endsWith('.pdf'));
+
+      if (!pdfEntry) {
+        return res.status(404).send('Arquivo PDF não encontrado dentro do ZIP');
+      }
+
+      // Extract the PDF content
+      const pdfBuffer = pdfEntry.getData();
+
+      // Sanitize the filename
+      const originalName = pdfEntry.entryName;
+      const sanitizedName = originalName
+        .replace(/[^a-zA-Z0-9.-]/g, '_') // Replace special chars with underscore
+        .replace(/__+/g, '_'); // Replace multiple underscores with single one
+
+      console.log('Original filename:', originalName);
+      console.log('Sanitized filename:', sanitizedName);
+
+      // Send the PDF file
       res.set({
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${fileId}.pdf"`,
+        'Content-Disposition': `attachment; filename="${sanitizedName}"`,
       });
-      res.send(buffer);
-    } else {
-      res.status(404).send('Não foi possível encontrar o arquivo PDF');
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Erro ao processar arquivo:', error);
+      res.status(500).send('Erro ao processar o arquivo');
     }
   }
 
