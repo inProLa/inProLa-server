@@ -71,13 +71,9 @@ export class SearchController {
       // Sanitize the filename
       const originalName = pdfEntry.entryName;
       const sanitizedName = originalName
-        .replace(/[^a-zA-Z0-9.-]/g, '_') // Replace special chars with underscore
-        .replace(/__+/g, '_'); // Replace multiple underscores with single one
+        .replace(/[^a-zA-Z0-9.-]/g, '_')
+        .replace(/__+/g, '_');
 
-      console.log('Original filename:', originalName);
-      console.log('Sanitized filename:', sanitizedName);
-
-      // Send the PDF file
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${sanitizedName}"`,
