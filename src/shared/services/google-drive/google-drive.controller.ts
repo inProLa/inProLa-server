@@ -12,9 +12,9 @@ export class GoogleDriveController {
       await this.googleDriveService.authorize();
       return response.status(200).json({ message: 'Authorization successful' });
     } catch (error) {
-      return response.status(500).json({ 
-        message: 'Authorization failed', 
-        error: error.message 
+      return response.status(500).json({
+        message: 'Authorization failed',
+        error: error.message,
       });
     }
   }
