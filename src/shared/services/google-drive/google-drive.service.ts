@@ -57,8 +57,11 @@ export class GoogleDriveService {
 
   async loadSavedCredentialsIfExist(): Promise<OAuth2Client | null> {
     try {
-      const tokenPath = path.join(process.cwd(), process.env.TOKEN_PATH);
+      if (!process.env.TOKEN_PATH) {
+        throw new Error('TOKEN_PATH environment variable is not defined');
+      }
 
+      const tokenPath = path.join(process.cwd(), process.env.TOKEN_PATH);
       if (!fs.existsSync(tokenPath)) {
         return null;
       }
